@@ -31,7 +31,7 @@ public class PublishNewSample {
 	private static int numOfSamples;
 
 	private static String fileName;
-	
+
 	private static List<SampleMetadata> meta;
 
 	@Value("${igo_new_sample}")
