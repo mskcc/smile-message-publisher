@@ -1,5 +1,5 @@
 # client-specific topics to listen or publish on
-igo_new_sample=
+igo.new_sample_intake_topic=
 
 # nats connection properties
 nats.clusterid=
