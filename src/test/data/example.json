@@ -1,0 +1,15 @@
+{
+    "igoId": "igoID",
+    "cmoSampleName": "cmoSampleName",
+    "sampleName": "sampleName",
+    "cmoPatientId": "sampleID",
+    "investigatorSampleId": "investigatorID",
+    "tumorOrNormal": "Tumor",
+    "tissueLocation": "brain met",
+    "specimenType": "CellLine",
+    "sampleOrigin": "Cell Pellet",
+    "preservation": "Frozen",
+    "sex": "Unknown",
+    "species": "Human",
+    "baitSet": "BAITS"
+}
