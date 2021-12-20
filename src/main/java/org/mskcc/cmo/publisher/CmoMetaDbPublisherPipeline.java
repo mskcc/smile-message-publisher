@@ -35,7 +35,10 @@ public class CmoMetaDbPublisherPipeline {
 
         String jobName = null;
         JobParametersBuilder jobParamsBuilder = new JobParametersBuilder();
-        if (commandLine.hasOption("r") || commandLine.hasOption("s")) {
+        if (commandLine.hasOption("m") && commandLine.hasOption("r")) {
+            jobName = BatchConfiguration.METADB_SERVICE_PUBLISHER_JOB;
+            jobParamsBuilder.addString("requestIds", commandLine.getOptionValue("r"));
+        } else if (commandLine.hasOption("r") || commandLine.hasOption("s")) {
             // validatate format for start date and end date (if applicable)
             if (commandLine.hasOption("s")) {
                 validateProvidedDates(commandLine.getOptionValue("s"), commandLine.getOptionValue("e"));
@@ -106,7 +109,8 @@ public class CmoMetaDbPublisherPipeline {
                         + "between the start and end dates provided. [OPTIONAL, START/END DATE MODE]")
                 .addOption("c", "cmo_requests", false, "Filter LIMS requests by CMO requests only "
                         + "[OPTIONAL, START/END MODE & REQUEST IDS MODE]")
-                .addOption("f", "publisher_filename", true, "Input publisher filename [FILE READING MODE]");
+                .addOption("f", "publisher_filename", true, "Input publisher filename [FILE READING MODE]")
+                .addOption("m", "metadb_service_mode", false, "Runs in MetadbService mode");
         return options;
     }
 
@@ -121,7 +125,7 @@ public class CmoMetaDbPublisherPipeline {
         CommandLineParser parser = new DefaultParser();
         CommandLine commandLine = parser.parse(options, args);
         if (commandLine.hasOption("h")
-                || (!commandLine.hasOption("r")
+                || (!commandLine.hasOption("r") && !commandLine.hasOption("m")
                 && !commandLine.hasOption("s") && !commandLine.hasOption("f"))) {
             help(options, 0);
         }
@@ -138,9 +142,13 @@ public class CmoMetaDbPublisherPipeline {
         } else if (commandLine.hasOption("c") && commandLine.hasOption("f")) {
             LOG.error("Cannot use --cmo_requests option with --publisher_filename");
             help(options, 1);
+        } else if (commandLine.hasOption("m") && !commandLine.hasOption("r")) {
+            LOG.error("Must run '-m' option with '-r'");
+            help(options, 1);
         } else if (!commandLine.hasOption("h") && !commandLine.hasOption("s")
-                && !commandLine.hasOption("f") && !commandLine.hasOption("r")) {
-            LOG.error("Must run application with at least option '-r', '-s', or '-f' - exiting...");
+                && !commandLine.hasOption("f") && !commandLine.hasOption("r")
+                && !commandLine.hasOption("m")) {
+            LOG.error("Must run application with at least option '-r', '-s', '-m' or '-f' - exiting...");
             help(options, 1);
         }
         return commandLine;

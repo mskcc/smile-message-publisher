@@ -31,3 +31,8 @@ lims.request_deliveries_endpoint=
 
 # metadb publishing failures filepath
 metadb.publishing_failures_filepath=
+
+# metadb service connection properties
+metadb.base_url=
+metadb.request_endpoint=
+metadb.cmo_new_request_topic=

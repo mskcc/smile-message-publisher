@@ -1,4 +1,4 @@
-package org.mskcc.cmo.publisher.pipeline.limsrest;
+package org.mskcc.cmo.publisher.pipeline.metadb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -16,16 +16,16 @@ import org.springframework.beans.factory.annotation.Value;
  *
  * @author ochoaa
  */
-public class LimsRequestWriter implements ItemStreamWriter<Map<String, Object>> {
+public class MetadbServiceWriter implements ItemStreamWriter<String> {
 
     @Autowired
     private Gateway messagingGateway;
 
-    @Value("${lims.publisher_topic}")
-    private String LIMS_PUBLISHER_TOPIC;
+    @Value("${metadb.cmo_new_request_topic}")
+    private String MDB_CMO_NEW_REQ_TOPIC;
 
-    private ObjectMapper mapper = new ObjectMapper();
-    private static final Log LOG = LogFactory.getLog(LimsRequestWriter.class);
+    private final ObjectMapper mapper = new ObjectMapper();
+    private static final Log LOG = LogFactory.getLog(MetadbServiceWriter.class);
 
     @Override
     public void open(ExecutionContext ec) throws ItemStreamException {}
@@ -37,19 +37,16 @@ public class LimsRequestWriter implements ItemStreamWriter<Map<String, Object>> 
     public void close() throws ItemStreamException {}
 
     @Override
-    public void write(List<? extends Map<String, Object>> requestResponseList) throws Exception {
-        for (Map<String, Object> request : requestResponseList) {
-            String requestId = (String) request.get("requestId");
-            String requestJson = mapper.writeValueAsString(request);
-            LOG.debug("\nPublishing IGO new request to MetaDB:\n\n"
-                    + requestJson + "\n\n on topic: " + LIMS_PUBLISHER_TOPIC);
+    public void write(List<? extends String> requestResponseList) throws Exception {
+        for (String requestJson : requestResponseList) {
+            Map<String, Object> reqMap = mapper.readValue(requestJson, Map.class);
+            String requestId = (String) reqMap.get("requestId");
             try {
-                messagingGateway.publish(LIMS_PUBLISHER_TOPIC, requestJson);
+                messagingGateway.publish(MDB_CMO_NEW_REQ_TOPIC, requestJson);
             } catch (Exception e) {
-                LOG.error("Error during attempt to publish on topic '" + LIMS_PUBLISHER_TOPIC
+                LOG.error("Error during attempt to publish on topic '" + MDB_CMO_NEW_REQ_TOPIC
                         + "' for request: " + requestId, e);
             }
         }
     }
-
 }

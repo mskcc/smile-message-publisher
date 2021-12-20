@@ -12,6 +12,8 @@ import org.mskcc.cmo.publisher.pipeline.limsrest.LimsRequestListener;
 import org.mskcc.cmo.publisher.pipeline.limsrest.LimsRequestProcessor;
 import org.mskcc.cmo.publisher.pipeline.limsrest.LimsRequestReader;
 import org.mskcc.cmo.publisher.pipeline.limsrest.LimsRequestWriter;
+import org.mskcc.cmo.publisher.pipeline.metadb.MetadbServiceReader;
+import org.mskcc.cmo.publisher.pipeline.metadb.MetadbServiceWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
@@ -55,6 +57,7 @@ public class BatchConfiguration {
 
     public static final String LIMS_REQUEST_PUBLISHER_JOB = "limsRequestPublisherJob";
     public static final String METADB_FILE_PUBLISHER_JOB = "metadbFilePublisherJob";
+    public static final String METADB_SERVICE_PUBLISHER_JOB = "metadbServicePublisherJob";
 
     @Value("${chunk.interval:10}")
     private Integer chunkInterval;
@@ -134,6 +137,30 @@ public class BatchConfiguration {
                 .<Map<String, String>, Map<String, String>>chunk(10)
                 .reader(metadbFilePublisherReader())
                 .writer(metadbFilePublisherWriter())
+                .build();
+    }
+
+    /**
+     * metadbServicePublisherJob
+     * @return
+     */
+    @Bean
+    public Job metadbServicePublisherJob() {
+        return jobBuilderFactory.get(METADB_SERVICE_PUBLISHER_JOB)
+                .start(metadbServicePublisherStep())
+                .build();
+    }
+
+    /**
+     * metadbServicePublisherStep
+     * @return
+     */
+    @Bean
+    public Step metadbServicePublisherStep() {
+        return stepBuilderFactory.get("metadbServicePublisherStep")
+                .<String, String>chunk(10)
+                .reader(mdbServiceReader())
+                .writer(mdbServiceWriter())
                 .build();
     }
 
@@ -256,6 +283,18 @@ public class BatchConfiguration {
     @Bean
     public StepExecutionListener limsRequestListener() {
         return new LimsRequestListener();
+    }
+
+    @Bean
+    @StepScope
+    public ItemStreamWriter<String> mdbServiceWriter() {
+        return new MetadbServiceWriter();
+    }
+
+    @Bean
+    @StepScope
+    public ItemStreamReader<String> mdbServiceReader() {
+        return new MetadbServiceReader();
     }
 
     // general spring batch configuration
