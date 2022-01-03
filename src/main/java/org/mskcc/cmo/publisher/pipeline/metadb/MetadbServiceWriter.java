@@ -42,7 +42,7 @@ public class MetadbServiceWriter implements ItemStreamWriter<String> {
             Map<String, Object> reqMap = mapper.readValue(requestJson, Map.class);
             String requestId = (String) reqMap.get("requestId");
             try {
-                messagingGateway.publish(MDB_CMO_NEW_REQ_TOPIC, requestJson);
+                messagingGateway.publish(requestId, MDB_CMO_NEW_REQ_TOPIC, requestJson);
             } catch (Exception e) {
                 LOG.error("Error during attempt to publish on topic '" + MDB_CMO_NEW_REQ_TOPIC
                         + "' for request: " + requestId, e);
