@@ -52,6 +52,10 @@ public class CmoMetaDbPublisherPipeline {
         } else if (commandLine.hasOption("f")) {
             jobName = BatchConfiguration.METADB_FILE_PUBLISHER_JOB;
             jobParamsBuilder.addString("publisherFilename", commandLine.getOptionValue("f"));
+        } else if (commandLine.hasOption("j")) {
+            jobName = BatchConfiguration.JSON_FILE_PUBLISHER_JOB;
+            jobParamsBuilder.addString("jsonFilename", commandLine.getOptionValue("j"))
+                    .addString("publisherTopic", commandLine.getOptionValue("t"));
         }
 
         // set up job, job launcher, and job execution
@@ -110,7 +114,10 @@ public class CmoMetaDbPublisherPipeline {
                 .addOption("c", "cmo_requests", false, "Filter LIMS requests by CMO requests only "
                         + "[OPTIONAL, START/END MODE & REQUEST IDS MODE]")
                 .addOption("f", "publisher_filename", true, "Input publisher filename [FILE READING MODE]")
-                .addOption("m", "metadb_service_mode", false, "Runs in MetadbService mode");
+                .addOption("m", "metadb_service_mode", false, "Runs in MetadbService mode")
+                .addOption("j", "json_filename", true, "Publishes contents from provided JSON file. "
+                        + "[JSON FILE READING MODE]")
+                .addOption("t", "topic", true, "Topic to publish to when running in JSON FILE READING MODE");
         return options;
     }
 
@@ -126,7 +133,8 @@ public class CmoMetaDbPublisherPipeline {
         CommandLine commandLine = parser.parse(options, args);
         if (commandLine.hasOption("h")
                 || (!commandLine.hasOption("r") && !commandLine.hasOption("m")
-                && !commandLine.hasOption("s") && !commandLine.hasOption("f"))) {
+                && !commandLine.hasOption("s") && !commandLine.hasOption("f")
+                && !commandLine.hasOption("j"))) {
             help(options, 0);
         }
         // check that command line options entered are valid
@@ -135,20 +143,27 @@ public class CmoMetaDbPublisherPipeline {
             LOG.error("Cannot use '--request_ids with '--start_date' or '--end_date'");
             help(options, 1);
         } else if (commandLine.hasOption("f") && (commandLine.hasOption("r")
-                || (commandLine.hasOption("s") || commandLine.hasOption("e")))) {
+                || (commandLine.hasOption("s") || commandLine.hasOption("e"))
+                || commandLine.hasOption("m"))) {
             LOG.error("Cannot use '--publisher_filename' with '--request_ids' or"
-                    + "'--start_date | --end_date'");
+                    + "'--start_date | --end_date' or '--metadb_service_mode'");
             help(options, 1);
-        } else if (commandLine.hasOption("c") && commandLine.hasOption("f")) {
-            LOG.error("Cannot use --cmo_requests option with --publisher_filename");
+        } else if (commandLine.hasOption("c") && (commandLine.hasOption("f")
+                || commandLine.hasOption("m"))) {
+            LOG.error("Cannot use --cmo_requests option with --publisher_filename or --metadb_service_mode "
+                    + "or --json_filename");
             help(options, 1);
         } else if (commandLine.hasOption("m") && !commandLine.hasOption("r")) {
             LOG.error("Must run '-m' option with '-r'");
             help(options, 1);
+        } else if (commandLine.hasOption("j") && !commandLine.hasOption("t")) {
+            LOG.error("Must run --json_filename option with --topic");
+            help(options, 1);
         } else if (!commandLine.hasOption("h") && !commandLine.hasOption("s")
                 && !commandLine.hasOption("f") && !commandLine.hasOption("r")
-                && !commandLine.hasOption("m")) {
-            LOG.error("Must run application with at least option '-r', '-s', '-m' or '-f' - exiting...");
+                && !commandLine.hasOption("m") && !commandLine.hasOption("j")) {
+            LOG.error("Must run application with at least option '-r', '-s', '-m', '-f', "
+                    + "or '-j' - exiting...");
             help(options, 1);
         }
         return commandLine;

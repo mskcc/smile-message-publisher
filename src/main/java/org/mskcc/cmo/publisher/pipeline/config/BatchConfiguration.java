@@ -5,9 +5,10 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import javax.sql.DataSource;
 import org.mskcc.cmo.messaging.Gateway;
-import org.mskcc.cmo.publisher.pipeline.MetaDbFilePublisherListener;
-import org.mskcc.cmo.publisher.pipeline.MetaDbFilePublisherReader;
-import org.mskcc.cmo.publisher.pipeline.MetaDbFilePublisherWriter;
+import org.mskcc.cmo.publisher.pipeline.JsonFileTasklet;
+import org.mskcc.cmo.publisher.pipeline.MetadbFilePublisherListener;
+import org.mskcc.cmo.publisher.pipeline.MetadbFilePublisherReader;
+import org.mskcc.cmo.publisher.pipeline.MetadbFilePublisherWriter;
 import org.mskcc.cmo.publisher.pipeline.limsrest.LimsRequestListener;
 import org.mskcc.cmo.publisher.pipeline.limsrest.LimsRequestProcessor;
 import org.mskcc.cmo.publisher.pipeline.limsrest.LimsRequestReader;
@@ -25,6 +26,7 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
+import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.integration.async.AsyncItemProcessor;
 import org.springframework.batch.integration.async.AsyncItemWriter;
 import org.springframework.batch.item.ItemProcessor;
@@ -58,6 +60,7 @@ public class BatchConfiguration {
     public static final String LIMS_REQUEST_PUBLISHER_JOB = "limsRequestPublisherJob";
     public static final String METADB_FILE_PUBLISHER_JOB = "metadbFilePublisherJob";
     public static final String METADB_SERVICE_PUBLISHER_JOB = "metadbServicePublisherJob";
+    public static final String JSON_FILE_PUBLISHER_JOB = "jsonFilePublisherJob";
 
     @Value("${chunk.interval:10}")
     private Integer chunkInterval;
@@ -108,6 +111,17 @@ public class BatchConfiguration {
     public Job metadbFilePublisherJob() {
         return jobBuilderFactory.get(METADB_FILE_PUBLISHER_JOB)
                 .start(metadbFilePublisherStep())
+                .build();
+    }
+
+    /**
+     * Json file reading job.
+     * @return
+     */
+    @Bean
+    public Job jsonFilePublisherJob() {
+        return jobBuilderFactory.get(JSON_FILE_PUBLISHER_JOB)
+                .start(jsonFileStep())
                 .build();
     }
 
@@ -165,13 +179,34 @@ public class BatchConfiguration {
     }
 
     /**
+     * Json file reading step.
+     * @return
+     */
+    @Bean
+    public Step jsonFileStep() {
+        return stepBuilderFactory.get("jsonFileStep")
+                .tasklet(jsonFileTasklet())
+                .build();
+    }
+
+    /**
+     * Json file reading and publisher tasklet.
+     * @return
+     */
+    @Bean
+    @StepScope
+    public Tasklet jsonFileTasklet() {
+        return new JsonFileTasklet();
+    }
+
+    /**
      * metadbFilePublisherReader
      * @return
      */
     @Bean
     @StepScope
     public ItemStreamReader<Map<String, String>> metadbFilePublisherReader() {
-        return new MetaDbFilePublisherReader();
+        return new MetadbFilePublisherReader();
     }
 
     /**
@@ -181,7 +216,7 @@ public class BatchConfiguration {
     @Bean
     @StepScope
     public ItemStreamWriter<Map<String, String>> metadbFilePublisherWriter() {
-        return new MetaDbFilePublisherWriter();
+        return new MetadbFilePublisherWriter();
     }
 
     /**
@@ -190,7 +225,7 @@ public class BatchConfiguration {
      */
     @Bean
     public StepExecutionListener metadbFilePublisherListener() {
-        return new MetaDbFilePublisherListener();
+        return new MetadbFilePublisherListener();
     }
 
     /**

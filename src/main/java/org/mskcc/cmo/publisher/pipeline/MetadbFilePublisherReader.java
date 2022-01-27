@@ -23,13 +23,13 @@ import org.springframework.beans.factory.annotation.Value;
  *
  * @author ochoaa
  */
-public class MetaDbFilePublisherReader implements ItemStreamReader<Map<String, String>> {
+public class MetadbFilePublisherReader implements ItemStreamReader<Map<String, String>> {
     @Value("#{jobParameters[publisherFilename]}")
     private String publisherFilename;
 
     private List<Map<String, String>> messagesToPublish;
 
-    private static final Log LOG = LogFactory.getLog(MetaDbFilePublisherReader.class);
+    private static final Log LOG = LogFactory.getLog(MetadbFilePublisherReader.class);
 
     @Override
     public void open(ExecutionContext ec) throws ItemStreamException {
