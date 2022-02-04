@@ -6,5 +6,5 @@ RUN mvn clean install
 
 # copy jar and set entrypoint
 FROM openjdk:8-slim
-COPY --from=0 /publisher/target/cmo_metadb_publisher.jar /publisher/cmo_metadb_publisher.jar
+COPY --from=0 /publisher/target/smile_publisher.jar /publisher/smile_publisher.jar
 ENTRYPOINT ["java"]

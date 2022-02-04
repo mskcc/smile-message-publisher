@@ -77,7 +77,7 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
         }
 
         // update request response with sample manifests fetched
-        // and add project id as well for cmo metadb
+        // and add project id as well for smile server
         String projectId = requestId.split("_")[0];
         requestResponse.put("projectId", projectId);
         requestResponse.put("samples", sampleManifestList);

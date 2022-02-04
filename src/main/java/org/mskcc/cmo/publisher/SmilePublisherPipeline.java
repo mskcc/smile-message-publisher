@@ -24,19 +24,19 @@ import org.springframework.context.ConfigurableApplicationContext;
  * @author DivyaMadala
  */
 @SpringBootApplication
-public class CmoMetaDbPublisherPipeline {
+public class SmilePublisherPipeline {
 
-    private static final Log LOG = LogFactory.getLog(CmoMetaDbPublisherPipeline.class);
+    private static final Log LOG = LogFactory.getLog(SmilePublisherPipeline.class);
 
     public static void main(String[] args) throws Exception {
-        SpringApplication app = new SpringApplication(CmoMetaDbPublisherPipeline.class);
+        SpringApplication app = new SpringApplication(SmilePublisherPipeline.class);
         ConfigurableApplicationContext ctx = app.run(args);
         CommandLine commandLine = parseArgs(args);
 
         String jobName = null;
         JobParametersBuilder jobParamsBuilder = new JobParametersBuilder();
-        if (commandLine.hasOption("m") && commandLine.hasOption("r")) {
-            jobName = BatchConfiguration.METADB_SERVICE_PUBLISHER_JOB;
+        if (commandLine.hasOption("w") && commandLine.hasOption("r")) {
+            jobName = BatchConfiguration.SMILE_WEB_SERVICE_PUBLISHER_JOB;
             jobParamsBuilder.addString("requestIds", commandLine.getOptionValue("r"));
         } else if (commandLine.hasOption("r") || commandLine.hasOption("s")) {
             // validatate format for start date and end date (if applicable)
@@ -50,7 +50,7 @@ public class CmoMetaDbPublisherPipeline {
                 .addString("endDate", commandLine.getOptionValue("e"))
                 .addString("cmoRequestsFilter", String.valueOf(commandLine.hasOption("c")));
         } else if (commandLine.hasOption("f")) {
-            jobName = BatchConfiguration.METADB_FILE_PUBLISHER_JOB;
+            jobName = BatchConfiguration.LOG_FILE_PUBLISHER_JOB;
             jobParamsBuilder.addString("publisherFilename", commandLine.getOptionValue("f"));
         } else if (commandLine.hasOption("j")) {
             jobName = BatchConfiguration.JSON_FILE_PUBLISHER_JOB;
@@ -114,7 +114,7 @@ public class CmoMetaDbPublisherPipeline {
                 .addOption("c", "cmo_requests", false, "Filter LIMS requests by CMO requests only "
                         + "[OPTIONAL, START/END MODE & REQUEST IDS MODE]")
                 .addOption("f", "publisher_filename", true, "Input publisher filename [FILE READING MODE]")
-                .addOption("m", "metadb_service_mode", false, "Runs in MetadbService mode")
+                .addOption("w", "smile_service_mode", false, "Runs in SMILE web service mode")
                 .addOption("j", "json_filename", true, "Publishes contents from provided JSON file. "
                         + "[JSON FILE READING MODE]")
                 .addOption("t", "topic", true, "Topic to publish to when running in JSON FILE READING MODE");
@@ -123,7 +123,7 @@ public class CmoMetaDbPublisherPipeline {
 
     private static void help(Options options, int exitStatus) {
         HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("CmoNewRequestPublisher", options);
+        helpFormatter.printHelp("SmilePublisherPipeline", options);
         System.exit(exitStatus);
     }
 
@@ -132,7 +132,7 @@ public class CmoMetaDbPublisherPipeline {
         CommandLineParser parser = new DefaultParser();
         CommandLine commandLine = parser.parse(options, args);
         if (commandLine.hasOption("h")
-                || (!commandLine.hasOption("r") && !commandLine.hasOption("m")
+                || (!commandLine.hasOption("r") && !commandLine.hasOption("w")
                 && !commandLine.hasOption("s") && !commandLine.hasOption("f")
                 && !commandLine.hasOption("j"))) {
             help(options, 0);
@@ -144,16 +144,16 @@ public class CmoMetaDbPublisherPipeline {
             help(options, 1);
         } else if (commandLine.hasOption("f") && (commandLine.hasOption("r")
                 || (commandLine.hasOption("s") || commandLine.hasOption("e"))
-                || commandLine.hasOption("m"))) {
+                || commandLine.hasOption("w"))) {
             LOG.error("Cannot use '--publisher_filename' with '--request_ids' or"
-                    + "'--start_date | --end_date' or '--metadb_service_mode'");
+                    + "'--start_date | --end_date' or '--smile_service_mode'");
             help(options, 1);
         } else if (commandLine.hasOption("c") && (commandLine.hasOption("f")
-                || commandLine.hasOption("m"))) {
-            LOG.error("Cannot use --cmo_requests option with --publisher_filename or --metadb_service_mode "
+                || commandLine.hasOption("w"))) {
+            LOG.error("Cannot use --cmo_requests option with --publisher_filename or --smile_service_mode "
                     + "or --json_filename");
             help(options, 1);
-        } else if (commandLine.hasOption("m") && !commandLine.hasOption("r")) {
+        } else if (commandLine.hasOption("w") && !commandLine.hasOption("r")) {
             LOG.error("Must run '-m' option with '-r'");
             help(options, 1);
         } else if (commandLine.hasOption("j") && !commandLine.hasOption("t")) {
@@ -161,7 +161,7 @@ public class CmoMetaDbPublisherPipeline {
             help(options, 1);
         } else if (!commandLine.hasOption("h") && !commandLine.hasOption("s")
                 && !commandLine.hasOption("f") && !commandLine.hasOption("r")
-                && !commandLine.hasOption("m") && !commandLine.hasOption("j")) {
+                && !commandLine.hasOption("w") && !commandLine.hasOption("j")) {
             LOG.error("Must run application with at least option '-r', '-s', '-m', '-f', "
                     + "or '-j' - exiting...");
             help(options, 1);

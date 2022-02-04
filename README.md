@@ -1,10 +1,8 @@
-# cmo-metadb-sample-publisher
-Spring Boot LIMS SampleMetadata publisher framework
-# CMO MetaDB Publisher 📘
+# SMILE (Sample MetaInformation Link Exchange) Publisher 📘
 
-The MetaDB Sample Publisher is one of several components that comprise the CMO MetaDB distributed microservices system. It runs as a standalone tool that may publish directly to specific `METADB.*` topics given the appropriate consumer permissions are provided.
+The SMILE Publisher is one of several components that comprise the SMILE distributed microservices system. It runs as a standalone tool that may publish directly to specific `MDB_STREAM.*` topics given the appropriate consumer permissions are provided.
 
-### The MetaDB Sample Publisher runs in 2 modes:
+### The SMILE Publisher runs in 2 modes:
 **1. LIMS Request IDs mode**
   - Option 1: Provide comma-separated list of request ids directly
   - Option 2: Provide a start date and (optionally) an end date to fetch LIMS requests delivered within the specified date range
@@ -49,7 +47,7 @@ mvn clean install
 Run with 
 
 ```
-java -jar target/cmo_metadb_publisher.jar
+java -jar target/smile_publisher.jar
 ```
 
 ### With Docker
@@ -73,12 +71,12 @@ If the Docker image is built with the properties baked in then simply run with:
 
 
 ```
-docker run --name sample-publisher <repo>/<tag>:<version> -jar /publisher/cmo_metadb_publisher.jar
+docker run --name sample-publisher <repo>/<tag>:<version> -jar /publisher/smile_publisher.jar
 ```
 
 Otherwise use a bind mount to make the local files available to the Docker image and add  `--spring.config.location` to the java arg
 
 
 ```
-docker run --mount type=bind,source=<local path to properties files>,target=/publisher/src/main/resources --name sample-publisher <repo>/<tag>:<version> -jar /publisher/cmo_metadb_publisher.jar --spring.config.location=/publisher/src/main/resources/application.properties
+docker run --mount type=bind,source=<local path to properties files>,target=/publisher/src/main/resources --name sample-publisher <repo>/<tag>:<version> -jar /publisher/smile_publisher.jar --spring.config.location=/publisher/src/main/resources/application.properties
 ```

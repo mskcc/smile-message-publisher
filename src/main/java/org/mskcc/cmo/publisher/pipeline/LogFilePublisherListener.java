@@ -10,8 +10,8 @@ import org.springframework.batch.core.StepExecutionListener;
  *
  * @author ochoaa
  */
-public class MetadbFilePublisherListener implements StepExecutionListener {
-    private static final Log LOG = LogFactory.getLog(MetadbFilePublisherListener.class);
+public class LogFilePublisherListener implements StepExecutionListener {
+    private static final Log LOG = LogFactory.getLog(LogFilePublisherListener.class);
 
     @Override
     public void beforeStep(StepExecution se) {}

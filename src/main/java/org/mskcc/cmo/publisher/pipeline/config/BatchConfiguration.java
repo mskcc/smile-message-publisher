@@ -6,15 +6,15 @@ import java.util.concurrent.Future;
 import javax.sql.DataSource;
 import org.mskcc.cmo.messaging.Gateway;
 import org.mskcc.cmo.publisher.pipeline.JsonFileTasklet;
-import org.mskcc.cmo.publisher.pipeline.MetadbFilePublisherListener;
-import org.mskcc.cmo.publisher.pipeline.MetadbFilePublisherReader;
-import org.mskcc.cmo.publisher.pipeline.MetadbFilePublisherWriter;
+import org.mskcc.cmo.publisher.pipeline.LogFilePublisherListener;
+import org.mskcc.cmo.publisher.pipeline.LogFilePublisherReader;
+import org.mskcc.cmo.publisher.pipeline.LogFilePublisherWriter;
 import org.mskcc.cmo.publisher.pipeline.limsrest.LimsRequestListener;
 import org.mskcc.cmo.publisher.pipeline.limsrest.LimsRequestProcessor;
 import org.mskcc.cmo.publisher.pipeline.limsrest.LimsRequestReader;
 import org.mskcc.cmo.publisher.pipeline.limsrest.LimsRequestWriter;
-import org.mskcc.cmo.publisher.pipeline.metadb.MetadbServiceReader;
-import org.mskcc.cmo.publisher.pipeline.metadb.MetadbServiceWriter;
+import org.mskcc.cmo.publisher.pipeline.smile.SmileWebServiceReader;
+import org.mskcc.cmo.publisher.pipeline.smile.SmileWebServiceWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
@@ -58,8 +58,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class BatchConfiguration {
 
     public static final String LIMS_REQUEST_PUBLISHER_JOB = "limsRequestPublisherJob";
-    public static final String METADB_FILE_PUBLISHER_JOB = "metadbFilePublisherJob";
-    public static final String METADB_SERVICE_PUBLISHER_JOB = "metadbServicePublisherJob";
+    public static final String LOG_FILE_PUBLISHER_JOB = "logFilePublisherJob";
+    public static final String SMILE_WEB_SERVICE_PUBLISHER_JOB = "smileWebServicePublisherJob";
     public static final String JSON_FILE_PUBLISHER_JOB = "jsonFilePublisherJob";
 
     @Value("${chunk.interval:10}")
@@ -93,8 +93,8 @@ public class BatchConfiguration {
     }
 
     /**
-     * limsRequestPublisherJob
-     * @return
+     * Job for running LimsRest pipeline.
+     * @return Job
      */
     @Bean
     public Job limsRequestPublisherJob() {
@@ -104,19 +104,19 @@ public class BatchConfiguration {
     }
 
     /**
-     * metadbFilePublisherJob
-     * @return
+     * Job for running log file pipeline.
+     * @return Job
      */
     @Bean
-    public Job metadbFilePublisherJob() {
-        return jobBuilderFactory.get(METADB_FILE_PUBLISHER_JOB)
-                .start(metadbFilePublisherStep())
+    public Job logFilePublisherJob() {
+        return jobBuilderFactory.get(LOG_FILE_PUBLISHER_JOB)
+                .start(logFilePublisherStep())
                 .build();
     }
 
     /**
-     * Json file reading job.
-     * @return
+     * Job for running JSON file pipeline.
+     * @return Job
      */
     @Bean
     public Job jsonFilePublisherJob() {
@@ -126,8 +126,8 @@ public class BatchConfiguration {
     }
 
     /**
-     * limsRequestPublisherStep
-     * @return
+     * Step for publishing from LimsRest.
+     * @return Step
      */
     @Bean
     public Step limsRequestPublisherStep() {
@@ -141,46 +141,46 @@ public class BatchConfiguration {
     }
 
     /**
-     * metadbFilePublisherStep
-     * @return
+     * Step for publishing from log file.
+     * @return Step
      */
     @Bean
-    public Step metadbFilePublisherStep() {
-        return stepBuilderFactory.get("metadbFilePublisherStep")
-                .listener(metadbFilePublisherListener())
+    public Step logFilePublisherStep() {
+        return stepBuilderFactory.get("logFilePublisherStep")
+                .listener(logFilePublisherListener())
                 .<Map<String, String>, Map<String, String>>chunk(10)
-                .reader(metadbFilePublisherReader())
-                .writer(metadbFilePublisherWriter())
+                .reader(logFilePublisherReader())
+                .writer(logFilePublisherWriter())
                 .build();
     }
 
     /**
-     * metadbServicePublisherJob
-     * @return
+     * Job for running SMILE web service pipeline.
+     * @return Job
      */
     @Bean
-    public Job metadbServicePublisherJob() {
-        return jobBuilderFactory.get(METADB_SERVICE_PUBLISHER_JOB)
-                .start(metadbServicePublisherStep())
+    public Job smileWebServicePublisherJob() {
+        return jobBuilderFactory.get(SMILE_WEB_SERVICE_PUBLISHER_JOB)
+                .start(smileWebServicePublisherStep())
                 .build();
     }
 
     /**
-     * metadbServicePublisherStep
-     * @return
+     * Step for SMILE web service pipeline.
+     * @return Step
      */
     @Bean
-    public Step metadbServicePublisherStep() {
-        return stepBuilderFactory.get("metadbServicePublisherStep")
+    public Step smileWebServicePublisherStep() {
+        return stepBuilderFactory.get("smileWebServicePublisherStep")
                 .<String, String>chunk(10)
-                .reader(mdbServiceReader())
-                .writer(mdbServiceWriter())
+                .reader(smileWebServiceReader())
+                .writer(smileWebServiceWriter())
                 .build();
     }
 
     /**
-     * Json file reading step.
-     * @return
+     * Step for JSON file reading pipeline.
+     * @return Step
      */
     @Bean
     public Step jsonFileStep() {
@@ -190,8 +190,8 @@ public class BatchConfiguration {
     }
 
     /**
-     * Json file reading and publisher tasklet.
-     * @return
+     * Tasklet for JSON file reading pipeline.
+     * @return Tasklet
      */
     @Bean
     @StepScope
@@ -200,37 +200,39 @@ public class BatchConfiguration {
     }
 
     /**
-     * metadbFilePublisherReader
-     * @return
+     * Reads and parses records from given input log file
+     * containing records with (date, topic, json to publish).
+     * @return ItemStreamReader
      */
     @Bean
     @StepScope
-    public ItemStreamReader<Map<String, String>> metadbFilePublisherReader() {
-        return new MetadbFilePublisherReader();
+    public ItemStreamReader<Map<String, String>> logFilePublisherReader() {
+        return new LogFilePublisherReader();
     }
 
     /**
-     * metadbFilePublisherWriter
-     * @return
+     * Publishes messages from the given input log file to the corresponding
+     * topic for the record.
+     * @return ItemStreamWriter
      */
     @Bean
     @StepScope
-    public ItemStreamWriter<Map<String, String>> metadbFilePublisherWriter() {
-        return new MetadbFilePublisherWriter();
+    public ItemStreamWriter<Map<String, String>> logFilePublisherWriter() {
+        return new LogFilePublisherWriter();
     }
 
     /**
-     * metadbFilePublisherListener
-     * @return
+     * Listener for log file reading-publishing pipeline.
+     * @return StepExecutionListener
      */
     @Bean
-    public StepExecutionListener metadbFilePublisherListener() {
-        return new MetadbFilePublisherListener();
+    public StepExecutionListener logFilePublisherListener() {
+        return new LogFilePublisherListener();
     }
 
     /**
-     * asyncLimsRequestThreadPoolTaskExecutor
-     * @return
+     * ThreadPoolTaskExecutor for LimsRest pipeline.
+     * @return ThreadPoolTaskExecutor
      */
     @Bean(name = "asyncLimsRequestThreadPoolTaskExecutor")
     @StepScope
@@ -243,8 +245,8 @@ public class BatchConfiguration {
     }
 
     /**
-     * processorThreadPoolTaskExecutor
-     * @return
+     * ThreadPoolTaskExecutor for LimsRest pipeline processor.
+     * @return ThreadPoolTaskExecutor
      */
     @Bean(name = "processorThreadPoolTaskExecutor")
     @StepScope
@@ -257,8 +259,8 @@ public class BatchConfiguration {
     }
 
     /**
-     * asyncItemProcessor
-     * @return
+     * ItemProcessor for LimsRest pipeline.
+     * @return ItemProcessor
      */
     @Bean
     @StepScope
@@ -270,8 +272,8 @@ public class BatchConfiguration {
     }
 
     /**
-     * limsRequestProcessor
-     * @return
+     * ItemProcessor for LimsRest pipeline.
+     * @return LimsRequestProcessor
      */
     @Bean
     @StepScope
@@ -280,8 +282,8 @@ public class BatchConfiguration {
     }
 
     /**
-     * asyncItemWriter
-     * @return
+     * ItemWriter for LimsRest pipeline.
+     * @return ItemWriter
      */
     @Bean
     @StepScope
@@ -291,30 +293,18 @@ public class BatchConfiguration {
         return asyncItemWriter;
     }
 
-    /**
-     * limsRequestWriter
-     * @return
-     */
     @Bean
     @StepScope
     public ItemStreamWriter<Map<String, Object>> limsRequestWriter() {
         return new LimsRequestWriter();
     }
 
-    /**
-     * limsRequestReader
-     * @return
-     */
     @Bean
     @StepScope
     public ItemStreamReader<String> limsRequestReader() {
         return new LimsRequestReader();
     }
 
-    /**
-     * limsRequestListener
-     * @return
-     */
     @Bean
     public StepExecutionListener limsRequestListener() {
         return new LimsRequestListener();
@@ -322,14 +312,14 @@ public class BatchConfiguration {
 
     @Bean
     @StepScope
-    public ItemStreamWriter<String> mdbServiceWriter() {
-        return new MetadbServiceWriter();
+    public ItemStreamWriter<String> smileWebServiceWriter() {
+        return new SmileWebServiceWriter();
     }
 
     @Bean
     @StepScope
-    public ItemStreamReader<String> mdbServiceReader() {
-        return new MetadbServiceReader();
+    public ItemStreamReader<String> smileWebServiceReader() {
+        return new SmileWebServiceReader();
     }
 
     // general spring batch configuration

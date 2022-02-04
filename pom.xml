@@ -110,7 +110,7 @@
   </dependencies>
 
   <build>
-    <finalName>cmo_metadb_publisher</finalName>
+    <finalName>smile_publisher</finalName>
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>

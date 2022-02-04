@@ -1,4 +1,4 @@
-package org.mskcc.cmo.publisher.pipeline.metadb;
+package org.mskcc.cmo.publisher.pipeline.smile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -16,16 +16,16 @@ import org.springframework.beans.factory.annotation.Value;
  *
  * @author ochoaa
  */
-public class MetadbServiceWriter implements ItemStreamWriter<String> {
+public class SmileWebServiceWriter implements ItemStreamWriter<String> {
 
     @Autowired
     private Gateway messagingGateway;
 
-    @Value("${metadb.cmo_new_request_topic}")
-    private String MDB_CMO_NEW_REQ_TOPIC;
+    @Value("${smile.cmo_new_request_topic}")
+    private String SMILE_NEW_REQUEST_TOPIC;
 
     private final ObjectMapper mapper = new ObjectMapper();
-    private static final Log LOG = LogFactory.getLog(MetadbServiceWriter.class);
+    private static final Log LOG = LogFactory.getLog(SmileWebServiceWriter.class);
 
     @Override
     public void open(ExecutionContext ec) throws ItemStreamException {}
@@ -42,9 +42,9 @@ public class MetadbServiceWriter implements ItemStreamWriter<String> {
             Map<String, Object> reqMap = mapper.readValue(requestJson, Map.class);
             String requestId = (String) reqMap.get("requestId");
             try {
-                messagingGateway.publish(requestId, MDB_CMO_NEW_REQ_TOPIC, requestJson);
+                messagingGateway.publish(requestId, SMILE_NEW_REQUEST_TOPIC, requestJson);
             } catch (Exception e) {
-                LOG.error("Error during attempt to publish on topic '" + MDB_CMO_NEW_REQ_TOPIC
+                LOG.error("Error during attempt to publish on topic '" + SMILE_NEW_REQUEST_TOPIC
                         + "' for request: " + requestId, e);
             }
         }

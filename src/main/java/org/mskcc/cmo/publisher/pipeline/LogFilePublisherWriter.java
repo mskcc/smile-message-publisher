@@ -14,11 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author ochoaa
  */
-public class MetadbFilePublisherWriter implements ItemStreamWriter<Map<String, String>> {
+public class LogFilePublisherWriter implements ItemStreamWriter<Map<String, String>> {
     @Autowired
     private Gateway messagingGateway;
 
-    private static final Log LOG = LogFactory.getLog(MetadbFilePublisherWriter.class);
+    private static final Log LOG = LogFactory.getLog(LogFilePublisherWriter.class);
 
     @Override
     public void open(ExecutionContext ec) throws ItemStreamException {}

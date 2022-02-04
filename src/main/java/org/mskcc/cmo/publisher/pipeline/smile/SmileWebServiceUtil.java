@@ -1,4 +1,4 @@
-package org.mskcc.cmo.publisher.pipeline.metadb;
+package org.mskcc.cmo.publisher.pipeline.smile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,21 +16,21 @@ import org.springframework.web.client.RestTemplate;
  * @author ochoaa
  */
 @Component
-public class MetadbServiceUtil {
+public class SmileWebServiceUtil {
     private final ObjectMapper mapper = new ObjectMapper();
-    @Value("${metadb.base_url}")
-    private String metadbBaseUrl;
-    @Value("${metadb.request_endpoint}")
-    private String metadbRequestEndpoint;
+    @Value("${smile.base_url}")
+    private String smileBaseUrl;
+    @Value("${smile.request_endpoint}")
+    private String smileRequestEndpoint;
 
     /**
-     * Given a requestID, returns response from Metadb web service.
+     * Given a requestID, returns response from SMILE web service.
      * @param requestId
      * @return String
      * @throws Exception
      */
     public String getRequestById(String requestId) throws Exception {
-        String requestUrl = metadbBaseUrl + metadbRequestEndpoint + requestId;
+        String requestUrl = smileBaseUrl + smileRequestEndpoint + requestId;
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = getRequestEntity();
         ResponseEntity responseEntity = restTemplate.exchange(requestUrl,
