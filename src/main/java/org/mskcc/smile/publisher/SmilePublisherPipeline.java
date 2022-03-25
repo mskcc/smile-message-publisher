@@ -1,4 +1,4 @@
-package org.mskcc.cmo.publisher;
+package org.mskcc.smile.publisher;
 
 import java.util.Date;
 import org.apache.commons.cli.CommandLine;
@@ -8,8 +8,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mskcc.cmo.publisher.pipeline.config.BatchConfiguration;
-import org.mskcc.cmo.publisher.pipeline.limsrest.LimsRequestUtil;
+import org.mskcc.smile.publisher.pipeline.config.BatchConfiguration;
+import org.mskcc.smile.publisher.pipeline.limsrest.LimsRequestUtil;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -24,19 +24,19 @@ import org.springframework.context.ConfigurableApplicationContext;
  * @author DivyaMadala
  */
 @SpringBootApplication
-public class CmoMetaDbPublisherPipeline {
+public class SmilePublisherPipeline {
 
-    private static final Log LOG = LogFactory.getLog(CmoMetaDbPublisherPipeline.class);
+    private static final Log LOG = LogFactory.getLog(SmilePublisherPipeline.class);
 
     public static void main(String[] args) throws Exception {
-        SpringApplication app = new SpringApplication(CmoMetaDbPublisherPipeline.class);
+        SpringApplication app = new SpringApplication(SmilePublisherPipeline.class);
         ConfigurableApplicationContext ctx = app.run(args);
         CommandLine commandLine = parseArgs(args);
 
         String jobName = null;
         JobParametersBuilder jobParamsBuilder = new JobParametersBuilder();
         if (commandLine.hasOption("m") && commandLine.hasOption("r")) {
-            jobName = BatchConfiguration.METADB_SERVICE_PUBLISHER_JOB;
+            jobName = BatchConfiguration.SMILE_SERVICE_PUBLISHER_JOB;
             jobParamsBuilder.addString("requestIds", commandLine.getOptionValue("r"));
         } else if (commandLine.hasOption("r") || commandLine.hasOption("s")) {
             // validatate format for start date and end date (if applicable)
@@ -50,7 +50,7 @@ public class CmoMetaDbPublisherPipeline {
                 .addString("endDate", commandLine.getOptionValue("e"))
                 .addString("cmoRequestsFilter", String.valueOf(commandLine.hasOption("c")));
         } else if (commandLine.hasOption("f")) {
-            jobName = BatchConfiguration.METADB_FILE_PUBLISHER_JOB;
+            jobName = BatchConfiguration.FILE_PUBLISHER_JOB;
             jobParamsBuilder.addString("publisherFilename", commandLine.getOptionValue("f"));
         } else if (commandLine.hasOption("j")) {
             jobName = BatchConfiguration.JSON_FILE_PUBLISHER_JOB;
@@ -114,7 +114,7 @@ public class CmoMetaDbPublisherPipeline {
                 .addOption("c", "cmo_requests", false, "Filter LIMS requests by CMO requests only "
                         + "[OPTIONAL, START/END MODE & REQUEST IDS MODE]")
                 .addOption("f", "publisher_filename", true, "Input publisher filename [FILE READING MODE]")
-                .addOption("m", "metadb_service_mode", false, "Runs in MetadbService mode")
+                .addOption("m", "smile_service_mode", false, "Runs in Smile Service mode")
                 .addOption("j", "json_filename", true, "Publishes contents from provided JSON file. "
                         + "[JSON FILE READING MODE]")
                 .addOption("t", "topic", true, "Topic to publish to when running in JSON FILE READING MODE");
@@ -146,11 +146,11 @@ public class CmoMetaDbPublisherPipeline {
                 || (commandLine.hasOption("s") || commandLine.hasOption("e"))
                 || commandLine.hasOption("m"))) {
             LOG.error("Cannot use '--publisher_filename' with '--request_ids' or"
-                    + "'--start_date | --end_date' or '--metadb_service_mode'");
+                    + "'--start_date | --end_date' or '--smile_service_mode'");
             help(options, 1);
         } else if (commandLine.hasOption("c") && (commandLine.hasOption("f")
                 || commandLine.hasOption("m"))) {
-            LOG.error("Cannot use --cmo_requests option with --publisher_filename or --metadb_service_mode "
+            LOG.error("Cannot use --cmo_requests option with --publisher_filename or --smile_service_mode "
                     + "or --json_filename");
             help(options, 1);
         } else if (commandLine.hasOption("m") && !commandLine.hasOption("r")) {

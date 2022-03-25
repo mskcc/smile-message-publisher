@@ -1,4 +1,4 @@
-package org.mskcc.cmo.publisher.pipeline;
+package org.mskcc.smile.publisher.pipeline;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;

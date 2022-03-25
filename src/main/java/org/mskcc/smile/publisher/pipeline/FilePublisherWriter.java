@@ -1,4 +1,4 @@
-package org.mskcc.cmo.publisher.pipeline;
+package org.mskcc.smile.publisher.pipeline;
 
 import java.util.List;
 import java.util.Map;
@@ -14,11 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author ochoaa
  */
-public class MetadbFilePublisherWriter implements ItemStreamWriter<Map<String, String>> {
+public class FilePublisherWriter implements ItemStreamWriter<Map<String, String>> {
     @Autowired
     private Gateway messagingGateway;
 
-    private static final Log LOG = LogFactory.getLog(MetadbFilePublisherWriter.class);
+    private static final Log LOG = LogFactory.getLog(FilePublisherWriter.class);
 
     @Override
     public void open(ExecutionContext ec) throws ItemStreamException {}

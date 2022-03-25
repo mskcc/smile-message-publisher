@@ -1,4 +1,4 @@
-package org.mskcc.cmo.publisher.pipeline;
+package org.mskcc.smile.publisher.pipeline;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,8 +10,8 @@ import org.springframework.batch.core.StepExecutionListener;
  *
  * @author ochoaa
  */
-public class MetadbFilePublisherListener implements StepExecutionListener {
-    private static final Log LOG = LogFactory.getLog(MetadbFilePublisherListener.class);
+public class FilePublisherListener implements StepExecutionListener {
+    private static final Log LOG = LogFactory.getLog(FilePublisherListener.class);
 
     @Override
     public void beforeStep(StepExecution se) {}

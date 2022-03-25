@@ -1,4 +1,4 @@
-package org.mskcc.cmo.publisher.pipeline.metadb;
+package org.mskcc.smile.publisher.pipeline.smile_server;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,29 +15,29 @@ import org.springframework.beans.factory.annotation.Value;
  *
  * @author ochoaa
  */
-public class MetadbServiceReader implements ItemStreamReader<String> {
+public class SmileServiceReader implements ItemStreamReader<String> {
     @Value("#{jobParameters[requestIds]}")
     private String requestIds;
 
     @Autowired
-    private MetadbServiceUtil metadbServiceUtil;
+    private SmileServiceUtil smileServiceUtil;
 
-    private List<String> metadbRequestsList;
+    private List<String> smileRequestsList;
 
-    private static final Log LOG = LogFactory.getLog(MetadbServiceReader.class);
+    private static final Log LOG = LogFactory.getLog(SmileServiceReader.class);
 
     @Override
     public void open(ExecutionContext ec) throws ItemStreamException {
         List<String> toReturn = new ArrayList<>();
         for (String requestId : Arrays.asList(requestIds.split(","))) {
             try {
-                String requestJson = metadbServiceUtil.getRequestById(requestId);
+                String requestJson = smileServiceUtil.getRequestById(requestId);
                 toReturn.add(requestJson);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         }
-        this.metadbRequestsList = toReturn;
+        this.smileRequestsList = toReturn;
     }
 
     @Override
@@ -48,8 +48,8 @@ public class MetadbServiceReader implements ItemStreamReader<String> {
 
     @Override
     public String read() throws Exception {
-        if (!metadbRequestsList.isEmpty()) {
-            return metadbRequestsList.remove(0);
+        if (!smileRequestsList.isEmpty()) {
+            return smileRequestsList.remove(0);
         }
         return null;
     }

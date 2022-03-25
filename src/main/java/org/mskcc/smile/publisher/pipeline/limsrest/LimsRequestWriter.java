@@ -1,4 +1,4 @@
-package org.mskcc.cmo.publisher.pipeline.limsrest;
+package org.mskcc.smile.publisher.pipeline.limsrest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -41,7 +41,7 @@ public class LimsRequestWriter implements ItemStreamWriter<Map<String, Object>> 
         for (Map<String, Object> request : requestResponseList) {
             String requestId = (String) request.get("requestId");
             String requestJson = mapper.writeValueAsString(request);
-            LOG.debug("\nPublishing IGO new request to MetaDB:\n\n"
+            LOG.debug("\nPublishing IGO new request to SMILE:\n\n"
                     + requestJson + "\n\n on topic: " + LIMS_PUBLISHER_TOPIC);
             try {
                 messagingGateway.publish(LIMS_PUBLISHER_TOPIC, requestJson);

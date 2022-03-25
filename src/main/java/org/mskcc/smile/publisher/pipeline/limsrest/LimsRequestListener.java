@@ -1,4 +1,4 @@
-package org.mskcc.cmo.publisher.pipeline.limsrest;
+package org.mskcc.smile.publisher.pipeline.limsrest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

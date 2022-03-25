@@ -1,4 +1,4 @@
-package org.mskcc.cmo.publisher.pipeline.limsrest;
+package org.mskcc.smile.publisher.pipeline.limsrest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

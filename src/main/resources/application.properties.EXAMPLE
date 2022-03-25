@@ -30,10 +30,10 @@ lims.request_samples_endpoint=
 lims.sample_manifest_endpoint=
 lims.request_deliveries_endpoint=
 
-# metadb publishing failures filepath
-metadb.publishing_failures_filepath=
+# smile publishing failures filepath
+smile.publishing_failures_filepath=
 
-# metadb service connection properties
-metadb.base_url=
-metadb.request_endpoint=
-metadb.cmo_new_request_topic=
+# smile service connection properties
+smile.base_url=
+smile.request_endpoint=
+smile.cmo_new_request_topic=

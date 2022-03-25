@@ -1,4 +1,4 @@
-package org.mskcc.cmo.publisher.pipeline.limsrest;
+package org.mskcc.smile.publisher.pipeline.limsrest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +77,7 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
         }
 
         // update request response with sample manifests fetched
-        // and add project id as well for cmo metadb
+        // and add project id as well for SMILE
         String projectId = requestId.split("_")[0];
         requestResponse.put("projectId", projectId);
         requestResponse.put("samples", sampleManifestList);
