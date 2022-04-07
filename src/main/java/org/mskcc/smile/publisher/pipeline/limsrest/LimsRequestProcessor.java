@@ -1,5 +1,6 @@
 package org.mskcc.smile.publisher.pipeline.limsrest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,8 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
     @Autowired
     private LimsRequestUtil limsRestUtil;
 
+    private final ObjectMapper mapper = new ObjectMapper();
+
     @Override
     public Map<String, Object> process(String requestId) throws Exception {
         CompletableFuture<Map<String, Object>> futureRequestResponse =
@@ -41,9 +44,9 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
                 return null;
             }
         }
-        List<String> sampleIds = limsRestUtil.getSampleIdsFromRequestResponse(requestResponse);
+        Map<String, Boolean> samples = limsRestUtil.getSamplesFromRequestResponse(requestResponse);
 
-        if (!requestResponse.containsKey("samples") || sampleIds == null || sampleIds.isEmpty()) {
+        if (!requestResponse.containsKey("samples") || samples == null || samples.isEmpty()) {
             LOG.error("Parsing request with no samples" + requestId);
             limsRestUtil.updateLimsRequestErrors(requestId, "Request JSON does not contain 'samples'");
             return null;
@@ -52,11 +55,14 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
         // get sample manifest for each sample id
         List<String> samplesWithErrors = new ArrayList<>();
         List<Object> sampleManifestList = new ArrayList<>();
-        for (String sampleId : sampleIds) {
+        for (String sampleId : samples.keySet()) {
             try {
                 CompletableFuture<List<Object>> manifest = limsRestUtil.getSampleManifest(sampleId);
                 if (manifest != null) {
-                    sampleManifestList.addAll(manifest.get());
+                    Object smObj = manifest.get().get(0);
+                    Map<String, Object> sampleManifest = mapper.convertValue(smObj, Map.class);
+                    sampleManifest.put("igoComplete", samples.get(sampleId));
+                    sampleManifestList.add(sampleManifest);
                 } else {
                     samplesWithErrors.add(sampleId);
                 }
