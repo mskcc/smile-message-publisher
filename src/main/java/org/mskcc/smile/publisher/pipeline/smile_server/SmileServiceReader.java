@@ -21,7 +21,7 @@ public class SmileServiceReader implements ItemStreamReader<String> {
     @Value("#{jobParameters[requestIds]}")
     private String requestIds;
 
-    @Value("#{jobParameters[cmoRequestsFilter]}")
+    @Value("#{jobParameters[cmoRequestsFilter] ?: true}")
     private Boolean cmoRequestsFilter;
 
     @Autowired
