@@ -37,7 +37,8 @@ public class SmilePublisherPipeline {
         JobParametersBuilder jobParamsBuilder = new JobParametersBuilder();
         if (commandLine.hasOption("m") && commandLine.hasOption("r")) {
             jobName = BatchConfiguration.SMILE_SERVICE_PUBLISHER_JOB;
-            jobParamsBuilder.addString("requestIds", commandLine.getOptionValue("r"));
+            jobParamsBuilder.addString("requestIds", commandLine.getOptionValue("r"))
+                    .addString("cmoRequestsFilter", String.valueOf(commandLine.hasOption("c")));
         } else if (commandLine.hasOption("r") || commandLine.hasOption("s")) {
             // validatate format for start date and end date (if applicable)
             if (commandLine.hasOption("s")) {
