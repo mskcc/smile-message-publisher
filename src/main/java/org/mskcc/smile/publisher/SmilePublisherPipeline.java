@@ -49,7 +49,8 @@ public class SmilePublisherPipeline {
             jobParamsBuilder.addString("requestIds", commandLine.getOptionValue("r"))
                 .addString("startDate", commandLine.getOptionValue("s"))
                 .addString("endDate", commandLine.getOptionValue("e"))
-                .addString("cmoRequestsFilter", String.valueOf(commandLine.hasOption("c")));
+                .addString("cmoRequestsFilter", String.valueOf(commandLine.hasOption("c")))
+                .addString("igoSampleIds", commandLine.getOptionValue("i"));
         } else if (commandLine.hasOption("f")) {
             jobName = BatchConfiguration.FILE_PUBLISHER_JOB;
             jobParamsBuilder.addString("publisherFilename", commandLine.getOptionValue("f"));
@@ -118,7 +119,9 @@ public class SmilePublisherPipeline {
                 .addOption("m", "smile_service_mode", false, "Runs in Smile Service mode")
                 .addOption("j", "json_filename", true, "Publishes contents from provided JSON file. "
                         + "[JSON FILE READING MODE]")
-                .addOption("t", "topic", true, "Topic to publish to when running in JSON FILE READING MODE");
+                .addOption("t", "topic", true, "Topic to publish to when running in JSON FILE READING MODE")
+                .addOption("i", "igo_sample_ids", true, "IGO sample IDs to filter request by "
+                        + "when fetching data");
         return options;
     }
 

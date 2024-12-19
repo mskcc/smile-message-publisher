@@ -2,8 +2,11 @@ package org.mskcc.smile.publisher.pipeline.limsrest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -23,6 +26,9 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
 
     @Value("#{jobParameters[cmoRequestsFilter]}")
     private Boolean cmoRequestsFilter;
+
+    @Value("#{jobParameters[igoSampleIds]}")
+    private String igoSampleIds;
 
     @Autowired
     private LimsRequestUtil limsRestUtil;
@@ -52,10 +58,18 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
             return null;
         }
 
+        // if igoSampleIds provided then limit set of samples to get data for to only those
+        Set<String> igoSamplesToFetch;
+        if (!StringUtils.isBlank(igoSampleIds)) {
+            igoSamplesToFetch = new HashSet<>(Arrays.asList(igoSampleIds.split(",")));
+        } else {
+            igoSamplesToFetch = samples.keySet();
+        }
+
         // get sample manifest for each sample id
         List<String> samplesWithErrors = new ArrayList<>();
         List<Object> sampleManifestList = new ArrayList<>();
-        for (String sampleId : samples.keySet()) {
+        for (String sampleId : igoSamplesToFetch) {
             try {
                 CompletableFuture<List<Object>> manifest = limsRestUtil.getSampleManifest(sampleId);
                 if (manifest != null) {
