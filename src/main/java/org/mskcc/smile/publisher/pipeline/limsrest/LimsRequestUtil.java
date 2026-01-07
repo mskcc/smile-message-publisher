@@ -148,16 +148,15 @@ public class LimsRequestUtil {
      * @param response
      * @return
      */
-    public Map<String,Boolean> getSamplesFromRequestResponse(Map<String, Object> response)
+    public Map<String, Map<String, Object>> getSamplesFromRequestResponse(Map<String, Object> response)
             throws JsonProcessingException {
         String samplesListJson = mapper.writeValueAsString(response.get("samples"));
         List<Map> samplesListMap = mapper.readValue(samplesListJson, List.class);
-        Map<String,Boolean> samples = new HashMap<>();
+        Map<String, Map<String, Object>> samples = new HashMap<>();
         if (samplesListMap != null) {
             for (Map m : samplesListMap) {
                 String sampleId = (String) m.get("igoSampleId");
-                Boolean igoCompleteStatus = (Boolean) m.get("igoComplete");
-                samples.put(sampleId, igoCompleteStatus);
+                samples.put(sampleId, m);
             }
         }
         return samples;
