@@ -18,6 +18,9 @@ import org.springframework.beans.factory.annotation.Value;
  */
 public class LimsRequestWriter implements ItemStreamWriter<Map<String, Object>> {
 
+    @Value("#{jobParameters[verbose]}")
+    private Boolean verbose;
+
     @Autowired
     private Gateway messagingGateway;
 
@@ -41,8 +44,10 @@ public class LimsRequestWriter implements ItemStreamWriter<Map<String, Object>> 
         for (Map<String, Object> request : requestResponseList) {
             String requestId = (String) request.get("requestId");
             String requestJson = mapper.writeValueAsString(request);
-            LOG.debug("\nPublishing IGO new request to SMILE:\n\n"
-                    + requestJson + "\n\n on topic: " + LIMS_PUBLISHER_TOPIC);
+            if (verbose) {
+                LOG.info("\nPublishing IGO new request to SMILE:\n\n"
+                        + requestJson + "\n\n on topic: " + LIMS_PUBLISHER_TOPIC);
+            }
             try {
                 messagingGateway.publish(LIMS_PUBLISHER_TOPIC, requestJson);
             } catch (Exception e) {

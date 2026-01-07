@@ -59,6 +59,8 @@ public class SmilePublisherPipeline {
             jobParamsBuilder.addString("jsonFilename", commandLine.getOptionValue("j"))
                     .addString("publisherTopic", commandLine.getOptionValue("t"));
         }
+        // verbose mode
+        jobParamsBuilder.addString("verbose", String.valueOf(commandLine.hasOption("v")));
 
         // set up job, job launcher, and job execution
         JobLauncher jobLauncher = ctx.getBean(JobLauncher.class);
@@ -121,7 +123,8 @@ public class SmilePublisherPipeline {
                         + "[JSON FILE READING MODE]")
                 .addOption("t", "topic", true, "Topic to publish to when running in JSON FILE READING MODE")
                 .addOption("i", "igo_sample_ids", true, "IGO sample IDs to filter request by "
-                        + "when fetching data");
+                        + "when fetching data")
+                .addOption("v", "verbose", false, "Verbose mode. Prints NATS message body to sysout.");
         return options;
     }
 

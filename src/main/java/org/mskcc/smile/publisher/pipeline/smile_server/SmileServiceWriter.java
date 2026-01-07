@@ -18,6 +18,9 @@ import org.springframework.beans.factory.annotation.Value;
  */
 public class SmileServiceWriter implements ItemStreamWriter<String> {
 
+    @Value("#{jobParameters[verbose]}")
+    private Boolean verbose;
+
     @Autowired
     private Gateway messagingGateway;
 
@@ -41,6 +44,10 @@ public class SmileServiceWriter implements ItemStreamWriter<String> {
         for (String requestJson : requestResponseList) {
             Map<String, Object> reqMap = mapper.readValue(requestJson, Map.class);
             String requestId = (String) reqMap.get("igoRequestId");
+            if (verbose) {
+                LOG.info("\nPulling request from SMILE:\n\n"
+                        + requestJson + "\n\n and publishing to topic: " + CMO_NEW_REQ_TOPIC);
+            }
             try {
                 messagingGateway.publish(requestId, CMO_NEW_REQ_TOPIC, requestJson);
             } catch (Exception e) {

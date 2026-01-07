@@ -50,7 +50,8 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
                 return null;
             }
         }
-        Map<String, Boolean> samples = limsRestUtil.getSamplesFromRequestResponse(requestResponse);
+        Map<String, Map<String, Object>> samples
+                = limsRestUtil.getSamplesFromRequestResponse(requestResponse);
 
         if (!requestResponse.containsKey("samples") || samples == null || samples.isEmpty()) {
             LOG.error("Parsing request with no samples" + requestId);
@@ -75,7 +76,9 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
                 if (manifest != null) {
                     Object smObj = manifest.get().get(0);
                     Map<String, Object> sampleManifest = mapper.convertValue(smObj, Map.class);
-                    sampleManifest.put("igoComplete", samples.get(sampleId));
+                    Map<String, Object> sampleRequestMap = samples.get(sampleId);
+                    sampleManifest.put("igoComplete", sampleRequestMap.get("igoComplete"));
+                    sampleManifest.put("sampleStatus", sampleRequestMap.get("sampleStatus"));
                     sampleManifestList.add(sampleManifest);
                 } else {
                     samplesWithErrors.add(sampleId);
