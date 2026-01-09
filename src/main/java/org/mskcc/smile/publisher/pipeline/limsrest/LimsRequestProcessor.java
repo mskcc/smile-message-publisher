@@ -95,9 +95,6 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
                     .append(StringUtils.join(samplesWithErrors, ", "));
             limsRestUtil.updateLimsRequestErrors(requestId, builder.toString());
         }
-        if (requestResponse.containsKey("deliveryDate")) {
-            requestResponse.remove("deliveryDate");
-        }
 
         // update request response with sample manifests fetched
         // and add project id as well for SMILE
